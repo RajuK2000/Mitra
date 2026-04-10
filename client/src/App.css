@@ -1,0 +1,117 @@
+/* Base styles */
+.custom-select {
+  width: 100%;
+  max-width: 260px;
+  position: relative;
+  font-family: Arial, sans-serif;
+}
+
+.select-box {
+  border: 1px solid #ccc;
+  padding: 10px 12px;
+  background: #fff;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+}
+
+.arrow {
+  font-size: 12px;
+}
+
+/* Dropdown */
+.dropdown {
+  position: absolute;
+  top: 100%;
+  width: 100%;
+  border: 1px solid #ccc;
+  background: #fff;
+  z-index: 10;
+}
+
+.dropdown input {
+  width: 100%;
+  padding: 8px 10px;
+  border: none;
+  border-bottom: 1px solid #ddd;
+  outline: none;
+  font-size: 14px;
+}
+
+.dropdown ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 180px;
+  overflow-y: auto;
+}
+
+.dropdown ul li {
+  padding: 8px 10px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.dropdown ul li:hover {
+  background: #f0f0f0;
+}
+
+.no-data {
+  padding: 8px 10px;
+  color: #888;
+  cursor: default;
+  font-size: 13px;
+}
+
+/* Title */
+.Title_Css {
+  font-size: clamp(16px, 2.5vw, 24px);
+  margin-bottom: 8px;
+}
+
+/* ---------------- RESPONSIVE ---------------- */
+
+/* Mobile devices */
+@media (max-width: 480px) {
+  .custom-select {
+    max-width: 100%;
+  }
+
+  .select-box {
+    padding: 12px;
+    font-size: 15px;
+  }
+
+  .dropdown input {
+    font-size: 15px;
+  }
+
+  .dropdown ul li {
+    padding: 10px;
+    font-size: 15px;
+  }
+}
+
+/* Tablets */
+@media (min-width: 481px) and (max-width: 768px) {
+  .custom-select {
+    max-width: 320px;
+  }
+
+  .select-box {
+    font-size: 15px;
+  }
+}
+
+/* Large screens */
+@media (min-width: 1024px) {
+  .custom-select {
+    max-width: 280px;
+  }
+
+  .select-box {
+    font-size: 14px;
+  }
+}
