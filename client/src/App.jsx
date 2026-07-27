@@ -4,6 +4,8 @@ import Chatbox from "./components/chatbox";
 import { useState } from "react";
 import { useRef } from "react";
 import { useEffect } from "react";
+import { Login } from "./pages/LoginPage/Login";
+import { ProtectedRoute } from "./components/ProtectedRoute";
 
 const titles = [
   "Apple",
@@ -44,11 +46,14 @@ function App() {
 
   return (
     <>
-      {/* <Routes>
-        <Route path="/" element={<Chatbox />} />
-      </Routes> */}
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Login />} />
+       
+       <Route path="/chats" element={<ProtectedRoute><Chatbox /></ProtectedRoute>} />
+      </Routes>
       {/* <h1>hhjbjbhjbj</h1> */}
-     <Chatbox />
+     {/* <Chatbox /> */}
 
  {/* <div className="search-field">
         
@@ -65,6 +70,7 @@ function App() {
           ))}
         </select>
       </div> */}
+      </BrowserRouter>
     </>
   );
 }

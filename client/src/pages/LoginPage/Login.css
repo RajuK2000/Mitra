@@ -1,0 +1,27 @@
+.Main_form{
+    margin-top: 15%;
+}
+.form_container{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    gap: 10px;
+}
+.form_container input{
+border: 2px solid red;
+width: 18vw;
+text-align: center;
+}
+.form_container label{
+font-size: 25px;
+color: green;
+}
+.form_container button{
+    border: none;
+    font-size: 18px;
+    border-radius: 5px;
+    cursor: pointer;
+    padding: 5px;
+    background-color: bisque;
+}

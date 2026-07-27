@@ -1,27 +1,27 @@
 const User = require("../models/usersModel");
-const { CreateusersService,getuserService } = require("../services/userServices")
+const { createMessageService, getuserService } = require("../services/userServices")
 
-const userCreation =async (req,res)=>{
-    console.log(req.body,"reqreq");
-    
-    try{
-        const user = await CreateusersService(req.body);
-        res.status(200).json(user)
-    }catch(err){
-        res.status(400).json({Error: err.message});
-    }
+const userCreation = async (req, res) => {
+  console.log(req.body, "reqreq");
+
+  try {
+    const user = await createMessageService(req.body);
+    res.status(200).json(user)
+  } catch (err) {
+    res.status(400).json({ Error: err.message });
+  }
 }
 
-const getuser = async (req,res)=>{
-    try{
-const users = await getuserService()
-console.log(users,"usersusers");
+const getuser = async (req, res) => {
+  try {
+    const users = await getuserService()
+    console.log(users, "usersusers");
 
-res.status(200).json(users)
-    }catch(err){
-    res.status(400).json({Error: err.message});
+    res.status(200).json(users)
+  } catch (err) {
+    res.status(400).json({ Error: err.message });
 
-    }
+  }
 }
 
 const deleteAllUsersService = async () => {
@@ -47,9 +47,55 @@ const deleteUserService = async (id) => {
   }
 };
 
-module.exports={
-    userCreation,
-    getuser,
-    deleteAllUsersService,
-    deleteUserService
+
+const searchUsers = async (req, res) => {
+  console.log(req, "requestttt");
+
+  try {
+
+    const keyword = req.query.keyword;
+    if (!keyword) {
+      return res.status(200).json({
+        users: []
+      });
+    }
+
+    const users = await User.find({
+      $or: [
+        {
+          name: {
+            $regex: keyword,
+            $options: "i"
+          }
+        },
+        {
+          email: {
+            $regex: keyword,
+            $options: "i"
+          }
+        }
+      ]
+    }).select("-password");
+    console.log(users, "usersusersusers");
+
+    res.status(200).json({
+      users
+    });
+
+  } catch (err) {
+
+    res.status(500).json({
+      message: err.message
+    });
+
+  }
+
+};
+
+module.exports = {
+  userCreation,
+  getuser,
+  deleteAllUsersService,
+  deleteUserService,
+  searchUsers
 }

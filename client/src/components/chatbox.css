@@ -158,7 +158,19 @@
   border-radius: 25px;
   cursor: pointer;
 }
-
+.Search_User_class input{
+  border: 1px solid red;
+  background-color: #fffcfc;
+  color: black;
+}
+.Search_User_class button{
+  border: none;
+  background-color: black;
+  color: white;
+  margin: 10px;
+  padding: 5px;
+  border-radius: 10px;
+}
 /* MOBILE RESPONSIVE */
 @media (max-width: 780px) {
   .sidebar {

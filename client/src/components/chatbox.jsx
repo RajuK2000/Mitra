@@ -1,97 +1,206 @@
 import React, { useEffect, useRef, useState } from "react";
 import "./chatbox.css";
+import axios from "axios";
+import useDebounce from "../hooks/Debouncing";
 
 export default function Chatbox() {
-  const [contacts] = useState([
-    { id: 1, name: "Asha", last: "Hey! are we meeting?" },
-    { id: 2, name: "Ravi", last: "Sent the files." },
-    { id: 3, name: "Sneha", last: "See you!" },
-  ]);
+  const [contacts, setcontacts] = useState([]);
+  const [loginUser, SetLogInuser] = useState()
+  const [Messages, setMessage] = useState([])
+  const [Conversations, setConversationss] = useState([])
+  const [active, setActive] = useState({});
+  console.log(Conversations, "Conversations");
+  const [search, setSearch] = useState("");
+  const [users, setUsers] = useState([]);
+  const debouncedSearch = useDebounce(search, 500);
+  console.log(users, "usersusers");
 
-  const [conversations, setConversations] = useState({
-    1: [
-      { id: "m1", from: "them", text: "Hi!", time: "10:01" },
-      { id: "m2", from: "me", text: "Hello Asha — what's up?", time: "10:02" },
-    ],
-    2: [{ id: "m3", from: "them", text: "Please check the doc.", time: "9:40" }],
-    3: [{ id: "m4", from: "them", text: "See you!", time: "Yesterday" }],
-  });
-  console.log(conversations,"conversations");
-  
+  useEffect(() => {
+    const logeduser = JSON.parse(sessionStorage.getItem("user") || [])
+    SetLogInuser(logeduser?.data)
+    ConversationFetch(logeduser?.data?._id)
+  }, [])
+  console.log(active, "usersusers");
 
-  const [active, setActive] = useState(1);
+
+  useEffect(() => {
+
+    if (!debouncedSearch.trim()) {
+      setUsers([]);
+      return;
+    }
+
+    const fetchUsers = async () => {
+
+      try {
+
+        const res = await axios.get(
+          `http://localhost:3000/api/search?keyword=${debouncedSearch}`
+        );
+
+        setUsers(res.data.users);
+
+      } catch (err) {
+
+        console.log(err);
+
+      }
+
+    };
+
+    fetchUsers();
+
+  }, [debouncedSearch]);
+
+
+  const fetchContacts = async () => {
+    try {
+      const contacts = await axios.get("http://localhost:3000/api/user");
+      setcontacts(contacts.data)
+    } catch (err) {
+      console.log("Error Message:", err.message);
+      console.log("Error Response:", err.response);
+      console.log("Full Error:", err);
+    }
+  }
+
+  const messagesFetch = async (Con_id) => {
+    try {
+      const messages = await axios.get(`http://localhost:3000/api/messages/${Con_id}`)
+      setMessage(messages)
+    } catch (err) {
+      console.log(err, "Maassage Fetch Error");
+    }
+  }
+  const ConversationFetch = async (user_Id) => {
+    try {
+      const Conversations = await axios.get(`http://localhost:3000/api/conversations/${user_Id}`)
+      setConversationss(Conversations?.data)
+    } catch (err) {
+      console.log(err, "Conversation Fetch Error");
+
+    }
+  }
+  useEffect(() => {
+    fetchContacts()
+  }, [])
   const [input, setInput] = useState("");
   const endRef = useRef(null);
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [active, conversations]);
+  }, [active]);
 
-  function sendMessage() {
-    if (!input.trim()) return;
+  const sendMessage = async () => {
+    const SentData = search !== "" ? {
+      "senderId": loginUser._id,
+      "receiverId": active.id,
+      "message": input,
+    } :
+      {
+        "senderId": loginUser._id,
+        "receiverId": active.reciverId,
+        "message": input,
+      }
+    try {
+      const sentmesage = await axios.post("http://localhost:3000/api/createMessaage", SentData)
+      alert("Message Sent!")
+      setInput("")
+      return sentmesage;
+    } catch (err) {
+      console.log(err, "Message Sent Error");
 
-    const newMsg = {
-      id: Date.now(),
-      from: "me",
-      text: input.trim(),
-      time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-    };
-
-    setConversations((prev) => ({
-      ...prev,
-      [active]: [...prev[active], newMsg],
-    }));
-
-    setInput("");
+    }
   }
 
   return (
     <div className="chat-wrapper">
-
-      {/* LEFT SIDEBAR */}
       <aside className="sidebar">
         <div className="sidebar-top">
-          <h2>Chats</h2>
+          <h2>Chats - {loginUser?.name}</h2>
+          <div className="Search_User_class">
+            <input type="text" placeholder="Enter email" value={search}
+              onChange={(e) => setSearch(e.target.value)}></input>
+          </div>
         </div>
 
         <div className="contact-list">
-          {contacts.map((c) => (
-            <div
-              key={c.id}
-              className={`contact-item ${c.id === active ? "active" : ""}`}
-              onClick={() => setActive(c.id)}
-            >
-              <div className="avatar">{c.name.charAt(0)}</div>
-              <div className="contact-info">
-                <strong>{c.name}</strong><br/>
-                <span>{c.last}</span>
-              </div>
-            </div>
-          ))}
+          {
+            search !== ""
+              ?
+              users.map((c) => {
+                const mine = c._id === loginUser._id
+                if (mine) {
+                  return ""
+                }
+                return (
+                  <div
+                    key={c._id}
+                    className={`contact-item ${c._id === active.id ? "active" : ""}`}
+                    onClick={() => { setActive({ id: c._id, name: c?.name }), messagesFetch(c._id) }}
+                  >
+                    <div className="avatar">
+                      {c?.name?.charAt(0)}
+                    </div>
+
+                    <div className="contact-info">
+                      <strong>{c?.name}</strong>
+                      <br />
+                      <span>{c.lastMessage}</span>
+                    </div>
+                  </div>
+                )
+              })
+              :
+
+              Conversations.map((c) => {
+                console.log(c, "jjjjjjjj");
+
+                const otherUser = c.participants.find(
+                  (p) => String(p._id) !== String(loginUser._id)
+                );
+
+                return (
+                  <div
+                    key={c._id}
+                    className={`contact-item ${c._id === active.id ? "active" : ""}`}
+                    onClick={() => { setActive({ id: c._id, name: otherUser?.name, reciverId: otherUser?._id }), messagesFetch(c._id) }}
+                  >
+                    <div className="avatar">
+                      {otherUser?.name?.charAt(0)}
+                    </div>
+
+                    <div className="contact-info">
+                      <strong>{otherUser?.name}</strong>
+                      <br />
+                      <span>{c.lastMessage}</span>
+                    </div>
+                  </div>
+                );
+              })
+
+          }
         </div>
       </aside>
 
-      {/* MAIN CHAT AREA */}
       <main className="chat-area">
 
-        {/* HEADER */}
         <header className="chat-header">
           <div className="avatar big">
-            {contacts.find((c) => c.id === active)?.name.charAt(0)}
+            {active?.name?.charAt(0) || ""}
           </div>
           <div>
-            <h3>{contacts.find((c) => c.id === active)?.name}</h3>
-            <p>Online</p>
+            <h3>{active?.name || ""}</h3>
+            <p>{active?.name && "Online"}</p>
           </div>
         </header>
 
-        {/* MESSAGES */}
         <section className="messages">
-          {(conversations[active] || []).map((m) => (
-            <div key={m.id} className={`msg ${m.from}`}>
+          {(Messages?.data || []).map((m) => (
+            <div key={m._id} className={`msg ${m.senderId === loginUser._id ? "me" : "them"} `}>
               <div className="bubble">
-                {m.text}
-                <span className="time">{m.time}</span>
+                {m.message}
+                <span className="time">{m.createdAt}</span>
               </div>
             </div>
           ))}
@@ -99,7 +208,6 @@ export default function Chatbox() {
           <div ref={endRef}></div>
         </section>
 
-        {/* INPUT BAR */}
         <footer className="chat-input">
           <input
             type="text"
