@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import "./chatbox.css";
 import axios from "axios";
 import useDebounce from "../hooks/Debouncing";
+import socket from "../../socket/socket.js";
 
 export default function Chatbox() {
   const [contacts, setcontacts] = useState([]);
@@ -9,19 +10,37 @@ export default function Chatbox() {
   const [Messages, setMessage] = useState([])
   const [Conversations, setConversationss] = useState([])
   const [active, setActive] = useState({});
-  console.log(Conversations, "Conversations");
+  const activeRef = useRef(null);
+  console.log(contacts, "contactscontacts");
   const [search, setSearch] = useState("");
   const [users, setUsers] = useState([]);
   const debouncedSearch = useDebounce(search, 500);
-  console.log(users, "usersusers");
+
+  const openConversation = (conversationId, name, receiverId) => {
+    setActive({
+      id: conversationId,
+      name,
+      reciverId: receiverId,
+    });
+
+    activeRef.current = conversationId;
+
+    messagesFetch(conversationId);
+    setSearch("")
+  };
 
   useEffect(() => {
     const logeduser = JSON.parse(sessionStorage.getItem("user") || [])
     SetLogInuser(logeduser?.data)
     ConversationFetch(logeduser?.data?._id)
   }, [])
-  console.log(active, "usersusers");
+  console.log(users, "usersusers");
 
+  useEffect(() => {
+    if (loginUser?._id) {
+      socket.emit("register", loginUser._id);
+    }
+  }, [loginUser]);
 
   useEffect(() => {
 
@@ -41,9 +60,7 @@ export default function Chatbox() {
         setUsers(res.data.users);
 
       } catch (err) {
-
         console.log(err);
-
       }
 
     };
@@ -66,12 +83,97 @@ export default function Chatbox() {
 
   const messagesFetch = async (Con_id) => {
     try {
-      const messages = await axios.get(`http://localhost:3000/api/messages/${Con_id}`)
-      setMessage(messages)
+      const response = await axios.get(
+        `http://localhost:3000/api/messages/${Con_id}`
+      );
+
+      console.log("Messages from API:", response.data);
+
+      setMessage(response.data);
+
     } catch (err) {
-      console.log(err, "Maassage Fetch Error");
+      console.log(err, "Message Fetch Error");
     }
-  }
+  };
+
+  const updateConversationLastMessage = (data) => {
+    const conversationId = data?.conversation?._id;
+    const lastMessage = data?.conversation?.lastMessage;
+
+    if (!conversationId) return;
+
+    setConversationss((prev) =>
+      prev.map((conversation) =>
+        String(conversation._id) === String(conversationId)
+          ? {
+            ...conversation,
+            lastMessage,
+          }
+          : conversation
+      )
+    );
+  };
+  useEffect(() => {
+
+    const handleReceiveMessage = (data) => {
+      console.log("RECEIVE MESSAGE:", data);
+      updateConversationLastMessage(data)
+      const newMessage = data?.message;
+
+      if (!newMessage) return;
+
+      const messageConversationId =
+        data?.conversation?._id
+
+      // Only show message if this conversation is currently open
+      if (
+        String(messageConversationId) !==
+        String(activeRef.current)
+      ) {
+        return;
+      }
+
+      setMessage((prev) => [
+        ...prev,
+        newMessage
+      ]);
+    };
+
+
+    const handleMessageSent = (data) => {
+      console.log("MESSAGE SENT:", data);
+      updateConversationLastMessage(data)
+      const newMessage = data?.message;
+      if (!newMessage) return;
+
+      const messageConversationId =
+        data?.conversation?._id
+
+      // Only show message in currently opened chat
+      if (
+        String(messageConversationId) !==
+        String(activeRef.current)
+      ) {
+        return;
+      }
+
+      setMessage((prev) => [
+        ...prev,
+        newMessage
+      ]);
+    };
+
+    //  if(active.id === data?.message?.senderId){
+    socket.on("receiveMessage", handleReceiveMessage);
+    socket.on("messageSent", handleMessageSent);
+
+    return () => {
+      socket.off("receiveMessage", handleReceiveMessage);
+      socket.off("messageSent", handleMessageSent);
+    };
+
+  }, []);
+
   const ConversationFetch = async (user_Id) => {
     try {
       const Conversations = await axios.get(`http://localhost:3000/api/conversations/${user_Id}`)
@@ -81,40 +183,75 @@ export default function Chatbox() {
 
     }
   }
-  useEffect(() => {
-    fetchContacts()
-  }, [])
+  // useEffect(() => {
+  //   fetchContacts()
+  // }, [])
   const [input, setInput] = useState("");
   const endRef = useRef(null);
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [active]);
+  }, [active, Messages]);
 
-  const sendMessage = async () => {
-    const SentData = search !== "" ? {
-      "senderId": loginUser._id,
-      "receiverId": active.id,
-      "message": input,
-    } :
-      {
-        "senderId": loginUser._id,
-        "receiverId": active.reciverId,
-        "message": input,
-      }
-    try {
-      const sentmesage = await axios.post("http://localhost:3000/api/createMessaage", SentData)
-      alert("Message Sent!")
-      setInput("")
-      return sentmesage;
-    } catch (err) {
-      console.log(err, "Message Sent Error");
+  // const sendMessage = async () => {
+  //   const SentData = search !== "" ? {
+  //     "senderId": loginUser._id,
+  //     "receiverId": active.id,
+  //     "message": input,
+  //   } :
+  //     {
+  //       "senderId": loginUser._id,
+  //       "receiverId": active.reciverId,
+  //       "message": input,
+  //     }
+  //   try {
+  //     const sentmesage = await axios.post("http://localhost:3000/api/createMessaage", SentData)
+  //     alert("Message Sent!")
+  //     setInput("")
+  //     return sentmesage;
+  //   } catch (err) {
+  //     console.log(err, "Message Sent Error");
 
+  //   }
+  // }
+  const sendMessage = () => {
+    if (!input.trim()) return;
+
+    const receiverId =
+      search !== ""
+        ? active.id
+        : active.reciverId;
+
+    if (!receiverId) {
+      console.log("Receiver not selected");
+      return;
     }
-  }
+
+    socket.emit("sendMessage", {
+      senderId: loginUser._id,
+      receiverId,
+      message: input,
+      messageType: "text",
+      fileUrl: null,
+    });
+
+    setInput("");
+  };
+
+  const closeChat = () => {
+    setActive({
+      id: "",
+      name: "",
+      reciverId: "",
+    });
+
+    activeRef.current = null;
+
+    setMessage([]);
+  };
 
   return (
-    <div className="chat-wrapper">
+    <div className={`chat-wrapper ${active?.id ? "chat-open" : ""}`}>
       <aside className="sidebar">
         <div className="sidebar-top">
           <h2>Chats - {loginUser?.name}</h2>
@@ -137,7 +274,19 @@ export default function Chatbox() {
                   <div
                     key={c._id}
                     className={`contact-item ${c._id === active.id ? "active" : ""}`}
-                    onClick={() => { setActive({ id: c._id, name: c?.name }), messagesFetch(c._id) }}
+                    onClick={() => {
+                      setActive({
+                        id: c._id,
+                        name: c?.name,
+                        reciverId: c?._id,
+                      });
+
+                      activeRef.current = null;
+
+                      setMessage([]);
+
+                      setSearch("");
+                    }}
                   >
                     <div className="avatar">
                       {c?.name?.charAt(0)}
@@ -164,8 +313,13 @@ export default function Chatbox() {
                   <div
                     key={c._id}
                     className={`contact-item ${c._id === active.id ? "active" : ""}`}
-                    onClick={() => { setActive({ id: c._id, name: otherUser?.name, reciverId: otherUser?._id }), messagesFetch(c._id) }}
-                  >
+                    onClick={() => {
+                      openConversation(
+                        c._id,
+                        otherUser?.name,
+                        otherUser?._id
+                      );
+                    }}                  >
                     <div className="avatar">
                       {otherUser?.name?.charAt(0)}
                     </div>
@@ -173,7 +327,7 @@ export default function Chatbox() {
                     <div className="contact-info">
                       <strong>{otherUser?.name}</strong>
                       <br />
-                      <span>{c.lastMessage}</span>
+                      <span>{c?.lastMessage}</span>
                     </div>
                   </div>
                 );
@@ -186,6 +340,12 @@ export default function Chatbox() {
       <main className="chat-area">
 
         <header className="chat-header">
+
+          <button className="back-btn"
+            onClick={closeChat}
+            aria-label="Back to chats">
+            ‹
+          </button>
           <div className="avatar big">
             {active?.name?.charAt(0) || ""}
           </div>
@@ -196,7 +356,7 @@ export default function Chatbox() {
         </header>
 
         <section className="messages">
-          {(Messages?.data || []).map((m) => (
+          {(Messages || []).map((m) => (
             <div key={m._id} className={`msg ${m.senderId === loginUser._id ? "me" : "them"} `}>
               <div className="bubble">
                 {m.message}

@@ -14,6 +14,7 @@ const CreateMessages = async (req, res) => {
         console.log(req, "hhhhhhhhhhhhhhhhhbbbbb");
 
         const message = await CreateMessage(req.body);
+        req.io.emit("receive-message", message);
         res.status(200).json(message)
     } catch (err) {
         console.log(err, "hhhhhhhhhhhh");

@@ -6,6 +6,7 @@ import { useRef } from "react";
 import { useEffect } from "react";
 import { Login } from "./pages/LoginPage/Login";
 import { ProtectedRoute } from "./components/ProtectedRoute";
+import Register from "./pages/Register/Register";
 
 const titles = [
   "Apple",
@@ -49,7 +50,7 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Login />} />
-       
+       <Route path="/register" element={<Register/>}/>
        <Route path="/chats" element={<ProtectedRoute><Chatbox /></ProtectedRoute>} />
       </Routes>
       {/* <h1>hhjbjbhjbj</h1> */}

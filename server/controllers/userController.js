@@ -1,11 +1,11 @@
 const User = require("../models/usersModel");
-const { createMessageService, getuserService } = require("../services/userServices")
+const { createUserService, getuserService } = require("../services/userServices")
 
 const userCreation = async (req, res) => {
   console.log(req.body, "reqreq");
 
   try {
-    const user = await createMessageService(req.body);
+    const user = await createUserService(req.body);
     res.status(200).json(user)
   } catch (err) {
     res.status(400).json({ Error: err.message });

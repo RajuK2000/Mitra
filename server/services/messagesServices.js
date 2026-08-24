@@ -33,7 +33,7 @@ const ConverationCreate = async (con) => {
 };
 
 
-const CreateMessage = async (data) => {
+const CreateMessage = async (data) => {  
   try {
     const {
       senderId,
@@ -77,10 +77,8 @@ const CreateMessage = async (data) => {
       readBy: [senderId]
     });
 
-    const savedMessage = await newMessage.save();
-
-    // Update conversation last message
     conversation.lastMessage = message;
+    const savedMessage = await newMessage.save();
 
     await conversation.save();
 
