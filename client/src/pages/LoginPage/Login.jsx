@@ -24,13 +24,31 @@ export const Login = () => {
       console.log(err);
     }
   }
+  const register =()=>{
+    navigate("/register")
+  }
   return (
-    <div className='Main_form'>
-      <form className='form_container' onSubmit={formsubmit}>
-        <label for="usermail">User mail</label>
-        <input id='usermail' name="email" value={data.email} onChange={handlechnage}></input>
-        <button type='submit'>Submit</button>
-      </form>
-    </div>
+    <div className="Main_form">
+  <form className="form_container" onSubmit={formsubmit}>
+    <label htmlFor="usermail">User mail</label>
+
+    <input
+      id="usermail"
+      name="email"
+      value={data.email}
+      onChange={handlechnage}
+    />
+
+    <button type="submit">Submit</button>
+
+    <button
+      type="button"
+      className="register_btn"
+      onClick={register}
+    >
+      Register
+    </button>
+  </form>
+</div>
   )
 }

@@ -1,8 +1,7 @@
 const mongoose = require("mongoose")
-
 const ConnectDB = async () => {
     try {
-        await mongoose.connect("mongodb://127.0.0.1:27017/myChats");
+        await mongoose.connect(process.env.MONGODB_URI);
         console.log("Database Connected!");
 
     } catch (err) {

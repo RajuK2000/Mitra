@@ -3,18 +3,18 @@ import "./chatbox.css";
 import axios from "axios";
 import useDebounce from "../hooks/Debouncing";
 import socket from "../../socket/socket.js";
+import { useNavigate } from "react-router-dom";
 
 export default function Chatbox() {
-  const [contacts, setcontacts] = useState([]);
   const [loginUser, SetLogInuser] = useState()
   const [Messages, setMessage] = useState([])
   const [Conversations, setConversationss] = useState([])
   const [active, setActive] = useState({});
   const activeRef = useRef(null);
-  console.log(contacts, "contactscontacts");
   const [search, setSearch] = useState("");
   const [users, setUsers] = useState([]);
   const debouncedSearch = useDebounce(search, 500);
+  const navigate = useNavigate()
 
   const openConversation = (conversationId, name, receiverId) => {
     setActive({
@@ -26,7 +26,7 @@ export default function Chatbox() {
     activeRef.current = conversationId;
 
     messagesFetch(conversationId);
-    setSearch("")
+    // setSearch("")
   };
 
   useEffect(() => {
@@ -70,17 +70,6 @@ export default function Chatbox() {
   }, [debouncedSearch]);
 
 
-  const fetchContacts = async () => {
-    try {
-      const contacts = await axios.get("http://localhost:3000/api/user");
-      setcontacts(contacts.data)
-    } catch (err) {
-      console.log("Error Message:", err.message);
-      console.log("Error Response:", err.response);
-      console.log("Full Error:", err);
-    }
-  }
-
   const messagesFetch = async (Con_id) => {
     try {
       const response = await axios.get(
@@ -102,16 +91,23 @@ export default function Chatbox() {
 
     if (!conversationId) return;
 
-    setConversationss((prev) =>
-      prev.map((conversation) =>
+    setConversationss((prev) => {
+      const updated = prev.map((conversation) =>
         String(conversation._id) === String(conversationId)
           ? {
             ...conversation,
             lastMessage,
+            updatedAt: new Date().toISOString(),
           }
           : conversation
-      )
-    );
+      );
+
+      return updated.sort(
+        (a, b) =>
+          new Date(b.updatedAt || 0) -
+          new Date(a.updatedAt || 0)
+      );
+    });
   };
   useEffect(() => {
 
@@ -190,7 +186,7 @@ export default function Chatbox() {
   const endRef = useRef(null);
 
   useEffect(() => {
-    endRef.current?.scrollIntoView({ behavior: "smooth" });
+    endRef.current?.scrollIntoView({ behavior: "auto" });
   }, [active, Messages]);
 
   // const sendMessage = async () => {
@@ -249,14 +245,50 @@ export default function Chatbox() {
 
     setMessage([]);
   };
+  let mergedConversations
+
+  if (Object.keys(active).length > 0) {
+    mergedConversations = [{ participants: [active] }, ...Conversations]
+    // setSearch("")
+
+  } else {
+    mergedConversations = [...Conversations]
+  }
+
+  const formatDate = (date) => {
+    return new Date(date).toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+  };
+  const groupedMessages = (Messages || []).reduce((groups, message) => {
+    const date = formatDate(message.createdAt);
+
+    if (!groups[date]) {
+      groups[date] = [];
+    }
+
+    groups[date].push(message);
+
+    return groups;
+  }, {});
+
+  const LogOut = () => {
+    sessionStorage.removeItem("user");
+    setTimeout(() => {
+      navigate("/");
+    }, 100);
+
+  };
 
   return (
     <div className={`chat-wrapper ${active?.id ? "chat-open" : ""}`}>
       <aside className="sidebar">
         <div className="sidebar-top">
-          <h2>Chats - {loginUser?.name}</h2>
+          <h2>Hi👋 - {loginUser?.name}</h2>
           <div className="Search_User_class">
-            <input type="text" placeholder="Enter email" value={search}
+            <input type="text" placeholder="Search name" value={search}
               onChange={(e) => setSearch(e.target.value)}></input>
           </div>
         </div>
@@ -301,25 +333,29 @@ export default function Chatbox() {
                 )
               })
               :
-
-              Conversations.map((c) => {
+              mergedConversations.sort((msg) => msg.UpdateAt - 1).map((c) => {
                 console.log(c, "jjjjjjjj");
 
                 const otherUser = c.participants.find(
                   (p) => String(p._id) !== String(loginUser._id)
                 );
 
+
                 return (
                   <div
                     key={c._id}
                     className={`contact-item ${c._id === active.id ? "active" : ""}`}
-                    onClick={() => {
-                      openConversation(
-                        c._id,
-                        otherUser?.name,
-                        otherUser?._id
-                      );
-                    }}                  >
+                    onClick={
+                      c._id
+                        ? () => {
+                          openConversation(
+                            c._id,
+                            otherUser?.name,
+                            otherUser?._id
+                          );
+                        }
+                        : undefined
+                    }              >
                     <div className="avatar">
                       {otherUser?.name?.charAt(0)}
                     </div>
@@ -340,31 +376,53 @@ export default function Chatbox() {
       <main className="chat-area">
 
         <header className="chat-header">
+          <div className="chat-header1">
+            {
+              Object.keys(active).length > 0 ?
+                <>
+                  <button className="back-btn"
+                    onClick={closeChat}
+                    aria-label="Back to chats">
+                    ‹
+                  </button>
+                  <div className="avatar big">
+                    {active?.name?.charAt(0) || ""}
+                  </div>
+                  <div>
+                    <h3>{active?.name || ""}</h3>
+                    <p>{active?.name && "Online"}</p>
+                  </div>
 
-          <button className="back-btn"
-            onClick={closeChat}
-            aria-label="Back to chats">
-            ‹
-          </button>
-          <div className="avatar big">
-            {active?.name?.charAt(0) || ""}
+                </>
+                :
+                ""
+            }
           </div>
-          <div>
-            <h3>{active?.name || ""}</h3>
-            <p>{active?.name && "Online"}</p>
-          </div>
+          <div className="avatar logout" title="Log Out" onClick={() => { LogOut() }}>⍈</div>
         </header>
 
         <section className="messages">
-          {(Messages || []).map((m) => (
-            <div key={m._id} className={`msg ${m.senderId === loginUser._id ? "me" : "them"} `}>
-              <div className="bubble">
-                {m.message}
-                <span className="time">{m.createdAt}</span>
-              </div>
-            </div>
-          ))}
+          {Object.entries(groupedMessages).map(([date, messages]) => (
+            <React.Fragment key={date}>
 
+              {/* Date separator */}
+              <div className="date-separator">
+                <span>{date}</span>
+              </div>
+              {(Messages || []).map((m) => (
+                <div key={m._id} className={`msg ${m.senderId === loginUser._id ? "me" : "them"} `}>
+                  <div className="bubble">
+                    {m.message}
+                    <span className="time">{new Date(m.createdAt).toLocaleTimeString([], {
+                      hour: "numeric",
+                      minute: "2-digit",
+                      hour12: true,
+                    })}</span>
+                  </div>
+                </div>
+              ))}
+            </React.Fragment>
+          ))}
           <div ref={endRef}></div>
         </section>
 

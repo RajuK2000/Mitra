@@ -203,10 +203,14 @@
 .chat-header {
   display: flex;
   align-items: center;
-  gap: 12px;
+  justify-content: space-between;
   padding: 16px 24px;
   border-bottom: 1px solid var(--border-subtle);
   background: var(--bg-panel);
+}
+.chat-header1{
+  display: flex;
+  gap: 1vw;
 }
 
 .back-button {
@@ -357,7 +361,13 @@
 .chat-input input::placeholder {
   color: var(--text-muted);
 }
-
+.logout{
+  cursor: pointer;
+}
+.back-btn{
+  font-size: 1.5rem;
+  cursor: pointer;
+}
 .chat-input input:focus {
   border-color: var(--accent-dim);
   box-shadow: 0 0 0 3px rgba(110, 231, 183, 0.12);
@@ -409,7 +419,41 @@
 .messages::-webkit-scrollbar-track {
   background: transparent;
 }
+.date-separator {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 20px 0 16px;
+  position: relative;
+}
 
+.date-separator::before,
+.date-separator::after {
+  content: "";
+  height: 1px;
+  flex: 1;
+  background: var(--border-subtle);
+  opacity: 0.7;
+}
+
+.date-separator span {
+  margin: 0 12px;
+  padding: 6px 12px;
+
+  background: var(--bg-elevated);
+  color: var(--text-secondary);
+
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  white-space: nowrap;
+}
 /* ---------------------------------------------------------
    Responsive breakpoints
    --------------------------------------------------------- */

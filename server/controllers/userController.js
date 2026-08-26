@@ -68,14 +68,14 @@ const searchUsers = async (req, res) => {
             $options: "i"
           }
         },
-        {
-          email: {
-            $regex: keyword,
-            $options: "i"
-          }
-        }
+        // {
+        //   email: {
+        //     $regex: keyword,
+        //     $options: "i"
+        //   }
+        // }
       ]
-    }).select("-password");
+    });
     console.log(users, "usersusersusers");
 
     res.status(200).json({

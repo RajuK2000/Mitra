@@ -38,16 +38,12 @@
   padding: 20px;
 
   background:
-    radial-gradient(
-      circle at 20% 0%,
+    radial-gradient(circle at 20% 0%,
       rgba(110, 231, 183, 0.08),
-      transparent 35%
-    ),
-    radial-gradient(
-      circle at 100% 100%,
+      transparent 35%),
+    radial-gradient(circle at 100% 100%,
       rgba(240, 184, 110, 0.05),
-      transparent 35%
-    ),
+      transparent 35%),
     var(--bg-app);
 
   font-family: var(--font-body);
@@ -199,11 +195,9 @@
   border-radius: 999px;
 
   background:
-    linear-gradient(
-      135deg,
+    linear-gradient(135deg,
       var(--accent) 0%,
-      #4fb890 100%
-    );
+      #4fb890 100%);
 
   color: #0b1410;
 
@@ -236,7 +230,45 @@
   transform: scale(0.98);
 }
 
+.loginText {
+  width: auto !important;
+  align-self: center;
 
+  margin-top: 2px !important;
+  padding: 6px 10px !important;
+
+  border: none !important;
+  background: transparent !important;
+
+  color: var(--accent) !important;
+
+  font-family: var(--font-body) !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  text-align: center;
+  margin-top: 1vw;
+  cursor: pointer;
+  box-shadow: none !important;
+  filter: none !important;
+  transition: color 0.2s ease, transform 0.15s ease;
+}
+
+.loginText:hover {
+  color: var(--text-primary) !important;
+  box-shadow: none !important;
+  filter: none !important;
+}
+
+.loginText:active {
+  transform: scale(0.96);
+}
+
+/* .{
+  color:var(--accent);
+  text-align: center;
+  margin-top: 1vw;
+  cursor: pointer;
+} */
 /* ---------------------------------------------------------
    Mobile
    --------------------------------------------------------- */

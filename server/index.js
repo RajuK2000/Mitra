@@ -10,6 +10,8 @@ const userRoutes = require("./routes/userRoutes");
 const userLogin = require("./routes/userlogin");
 const messagesRoutes = require("./routes/messagesRoute");
 const ConnectDB = require("./config/db");
+require("dotenv").config();
+
 
 const server = http.createServer(app);
 

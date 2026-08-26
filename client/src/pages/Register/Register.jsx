@@ -47,7 +47,9 @@ export default function Register() {
 
         }
     };
-
+const logIn = ()=>{
+    navigate("/")
+}
     return (
         <div className="register-container">
             <form className="register-form" onSubmit={handleSubmit}>
@@ -102,6 +104,13 @@ export default function Register() {
                 </div>
 
                 <button type="submit">Register</button>
+                <p
+                    type="button"
+                    className="loginText"
+                    onClick={logIn}
+                >
+                    LogIn
+                </p>
             </form>
         </div>
     );

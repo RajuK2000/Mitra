@@ -232,7 +232,37 @@
 .form_container button:active {
     transform: scale(0.98);
 }
+.register_btn {
+    width: auto !important;
+    align-self: center;
 
+    margin-top: 2px !important;
+    padding: 6px 10px !important;
+
+    border: none !important;
+    background: transparent !important;
+
+    color: var(--accent) !important;
+
+    font-family: var(--font-body) !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+
+    cursor: pointer;
+    box-shadow: none !important;
+    filter: none !important;
+    transition: color 0.2s ease, transform 0.15s ease;
+}
+
+.register_btn:hover {
+    color: var(--text-primary) !important;
+    box-shadow: none !important;
+    filter: none !important;
+}
+
+.register_btn:active {
+    transform: scale(0.96);
+}
 
 /* =========================================================
    Mobile
