@@ -1,36 +1,52 @@
+require("dotenv").config();
+
 const express = require("express");
 const cors = require("cors");
 const http = require("http");
 const { Server } = require("socket.io");
 
 const app = express();
-const port = 3000;
+
+const port = process.env.PORT || 3000;
 
 const userRoutes = require("./routes/userRoutes");
 const userLogin = require("./routes/userlogin");
 const messagesRoutes = require("./routes/messagesRoute");
 const ConnectDB = require("./config/db");
-require("dotenv").config();
 
+const allowedOrigins = [
+    "http://localhost:5173",
+    "https://mitra-eta-olive.vercel.app"
+];
+
+// Express CORS
+app.use(cors({
+    origin: allowedOrigins,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+    credentials: true
+}));
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 const server = http.createServer(app);
 
+// Socket.IO CORS
 const io = new Server(server, {
     cors: {
-        origin: ["http://localhost:5173", "https://mitra-eta-olive.vercel.app/"],
+        origin: allowedOrigins,
         methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
         credentials: true
     }
 });
-require("./sockets/chatSocket")(io);
+
+// Make io available inside routes
 app.use((req, res, next) => {
     req.io = io;
     next();
 });
 
-app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+require("./sockets/chatSocket")(io);
 
 ConnectDB();
 
@@ -45,7 +61,6 @@ app.get("/", (req, res) => {
 io.on("connection", (socket) => {
     console.log("A user connected:", socket.id);
 
-    // Join user room
     socket.on("join", (userId) => {
         socket.join(userId);
         console.log(`User ${userId} joined room`);
@@ -56,6 +71,6 @@ io.on("connection", (socket) => {
     });
 });
 
-server.listen(port, () => {
-    console.log(`Server running on port ${port}`);
+server.listen(port, "0.0.0.0", () => {
+    console.log(`Mitra server running on port ${port}`);
 });
