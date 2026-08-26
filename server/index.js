@@ -17,8 +17,9 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
     cors: {
-        origin: ["http://localhost:5173","https://mitra-eta-olive.vercel.app/"],
-        methods: ["GET", "POST"]
+        origin: ["http://localhost:5173", "https://mitra-eta-olive.vercel.app/"],
+        methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+        credentials: true
     }
 });
 require("./sockets/chatSocket")(io);
