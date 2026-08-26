@@ -14,7 +14,7 @@ export const Login = () => {
   const formsubmit = async (e) => {
     e.preventDefault();
     try {
-      const Daata = await axios.post("http://localhost:3000/api/login", data)
+      const Daata = await axios.post("https://mitra-lyao.onrender.com/api/login", data)
       console.log(Daata.status, "DaataDaata");
       if(Daata.status === 200){
       sessionStorage.setItem("user", JSON.stringify(Daata))

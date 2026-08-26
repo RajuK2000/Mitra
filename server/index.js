@@ -17,7 +17,7 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
     cors: {
-        origin: "http://localhost:5173",
+        origin: ["http://localhost:5173"],
         methods: ["GET", "POST"]
     }
 });
@@ -37,10 +37,14 @@ app.use("/api", userRoutes);
 app.use("/api", userLogin);
 app.use("/api", messagesRoutes);
 
+app.get("/", (req, res) => {
+    res.send("Mitra Server Running");
+});
+
 io.on("connection", (socket) => {
     console.log("A user connected:", socket.id);
 
-      // Join user room
+    // Join user room
     socket.on("join", (userId) => {
         socket.join(userId);
         console.log(`User ${userId} joined room`);

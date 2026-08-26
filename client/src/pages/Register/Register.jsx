@@ -25,7 +25,7 @@ export default function Register() {
         e.preventDefault();
         try {
 
-            const Register = await axios.post("http://localhost:3000/api/user", formData)
+            const Register = await axios.post("https://mitra-lyao.onrender.com/api/user", formData)
             if (Register.status === 200) {
                 setTimeout(() => {
                     navigate("/")
