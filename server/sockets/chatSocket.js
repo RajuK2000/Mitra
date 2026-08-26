@@ -7,7 +7,7 @@ module.exports = (io) => {
 
   io.on("connection", (socket) => {
 
-    console.log("User connected:", socket.id);
+    console.log("✅ SOCKET CONNECTED:", socket.id);
 
 
     // Register logged-in user
@@ -15,9 +15,7 @@ module.exports = (io) => {
 
       socket.join(`user_${userId}`);
 
-      console.log(
-        `User ${userId} joined user_${userId}`
-      );
+      console.log("👤 JOIN:", userId);
 
     });
 
@@ -100,13 +98,8 @@ module.exports = (io) => {
     });
 
 
-    socket.on("disconnect", () => {
-
-      console.log(
-        "User disconnected:",
-        socket.id
-      );
-
+    socket.on("disconnect", (reason) => {
+      console.log("❌ SOCKET DISCONNECTED:", socket.id, reason);
     });
 
   });
