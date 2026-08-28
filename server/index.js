@@ -26,8 +26,7 @@ app.use(cors({
     credentials: true
 }));
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+
 
 const server = http.createServer(app);
 
@@ -49,6 +48,8 @@ app.use((req, res, next) => {
 require("./sockets/chatSocket")(io);
 
 ConnectDB();
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 app.use("/api", userRoutes);
 app.use("/api", userLogin);

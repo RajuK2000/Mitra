@@ -21,7 +21,7 @@ export const Login = () => {
       navigate("/chats")
       }
     } catch (err) {
-      console.log(err);
+      console.log(err,"error");
     }
   }
   const register =()=>{
