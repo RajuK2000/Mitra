@@ -23,9 +23,16 @@ export default function Register() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        const dataToSend = {
+            ...formData,
+            email: formData.email.toLowerCase(),
+            name: formData.name.toLowerCase()
+        };
+        console.log(dataToSend, "datatisend");
+
         try {
 
-            const Register = await axios.post("https://mitra-lyao.onrender.com/api/user", formData)
+            const Register = await axios.post("https://mitra-lyao.onrender.com/api/user", dataToSend)
             if (Register.status === 200) {
                 setTimeout(() => {
                     navigate("/")
@@ -47,9 +54,9 @@ export default function Register() {
 
         }
     };
-const logIn = ()=>{
-    navigate("/")
-}
+    const logIn = () => {
+        navigate("/")
+    }
     return (
         <div className="register-container">
             <form className="register-form" onSubmit={handleSubmit}>

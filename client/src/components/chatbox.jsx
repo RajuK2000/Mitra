@@ -286,7 +286,7 @@ export default function Chatbox() {
     <div className={`chat-wrapper ${active?.id ? "chat-open" : ""}`}>
       <aside className="sidebar">
         <div className="sidebar-top">
-          <h2>Hi👋 - {loginUser?.name}</h2>
+          <h2>Hi👋 - {loginUser?.name.charAt(0).toUpperCase() + loginUser?.name.slice(1).toLowerCase()}</h2>
           <div className="Search_User_class">
             <input type="text" placeholder="Search name" value={search}
               onChange={(e) => setSearch(e.target.value)}></input>
@@ -317,7 +317,7 @@ export default function Chatbox() {
 
                       setMessage([]);
 
-                      setSearch("");
+                      // setSearch("");
                     }}
                   >
                     <div className="avatar">
@@ -325,8 +325,8 @@ export default function Chatbox() {
                     </div>
 
                     <div className="contact-info">
-                      <strong>{c?.name}</strong>
-                      <br />
+                      <strong>{c?.name.charAt(0).toUpperCase() + c?.name?.slice(1).toLowerCase()}</strong>
+                      {/* <br /> */}
                       <span>{c.lastMessage}</span>
                     </div>
                   </div>
@@ -339,7 +339,6 @@ export default function Chatbox() {
                 const otherUser = c.participants.find(
                   (p) => String(p._id) !== String(loginUser._id)
                 );
-
 
                 return (
                   <div
@@ -355,13 +354,13 @@ export default function Chatbox() {
                           );
                         }
                         : undefined
-                    }              >
+                    } >
                     <div className="avatar">
                       {otherUser?.name?.charAt(0)}
                     </div>
 
                     <div className="contact-info">
-                      <strong>{otherUser?.name}</strong>
+                      <strong>{otherUser?.name.charAt(0).toUpperCase() + otherUser?.name?.slice(1).toLowerCase()}</strong>
                       <br />
                       <span>{c?.lastMessage}</span>
                     </div>
@@ -386,10 +385,10 @@ export default function Chatbox() {
                     ‹
                   </button>
                   <div className="avatar big">
-                    {active?.name?.charAt(0) || ""}
+                    {active?.name?.charAt(0).toUpperCase() || ""}
                   </div>
                   <div>
-                    <h3>{active?.name || ""}</h3>
+                    <h3>{active?.name.charAt(0).toUpperCase() + active.name.slice(1).toLowerCase() || ""}</h3>
                     <p>{active?.name && "Online"}</p>
                   </div>
 

@@ -14,41 +14,47 @@ export const Login = () => {
   const formsubmit = async (e) => {
     e.preventDefault();
     try {
-      const Daata = await axios.post("https://mitra-lyao.onrender.com/api/login", data)
+      const SentData = {
+        email: data.email.toLowerCase()
+      };
+      console.log(SentData,"SentData");
+      
+      const Daata = await axios.post("https://mitra-lyao.onrender.com/api/login", SentData)
       console.log(Daata.status, "DaataDaata");
-      if(Daata.status === 200){
-      sessionStorage.setItem("user", JSON.stringify(Daata))
-      navigate("/chats")
+      if (Daata.status === 200) {
+        sessionStorage.setItem("user", JSON.stringify(Daata))
+        navigate("/chats")
       }
-    } catch (err) {
-      console.log(err,"error");
+    } catch (error) {
+      alert(error?.response?.data?.message)
+      console.log(error.response.data.message, "error");
     }
   }
-  const register =()=>{
+  const register = () => {
     navigate("/register")
   }
   return (
     <div className="Main_form">
-  <form className="form_container" onSubmit={formsubmit}>
-    <label htmlFor="usermail">User mail</label>
+      <form className="form_container" onSubmit={formsubmit}>
+        <label htmlFor="usermail">User mail</label>
 
-    <input
-      id="usermail"
-      name="email"
-      value={data.email}
-      onChange={handlechnage}
-    />
+        <input
+          id="usermail"
+          name="email"
+          value={data.email}
+          onChange={handlechnage}
+        />
 
-    <button type="submit">Submit</button>
+        <button type="submit">Submit</button>
 
-    <button
-      type="button"
-      className="register_btn"
-      onClick={register}
-    >
-      Register
-    </button>
-  </form>
-</div>
+        <button
+          type="button"
+          className="register_btn"
+          onClick={register}
+        >
+          Register
+        </button>
+      </form>
+    </div>
   )
 }
