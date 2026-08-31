@@ -54,7 +54,7 @@ export default function Chatbox() {
       try {
 
         const res = await axios.get(
-          `https://mitra-lyao.onrender.com/api/search?keyword=${debouncedSearch}`
+          `http://localhost:3000/api/search?keyword=${debouncedSearch}`
         );
 
         setUsers(res.data.users);
@@ -73,7 +73,7 @@ export default function Chatbox() {
   const messagesFetch = async (Con_id) => {
     try {
       const response = await axios.get(
-        `https://mitra-lyao.onrender.com/api/messages/${Con_id}`
+        `http://localhost:3000/api/messages/${Con_id}`
       );
 
       console.log("Messages from API:", response.data);
@@ -172,7 +172,7 @@ export default function Chatbox() {
 
   const ConversationFetch = async (user_Id) => {
     try {
-      const Conversations = await axios.get(`https://mitra-lyao.onrender.com/api/conversations/${user_Id}`)
+      const Conversations = await axios.get(`http://localhost:3000/api/conversations/${user_Id}`)
       setConversationss(Conversations?.data)
     } catch (err) {
       console.log(err, "Conversation Fetch Error");
@@ -201,7 +201,7 @@ export default function Chatbox() {
   //       "message": input,
   //     }
   //   try {
-  //     const sentmesage = await axios.post("https://mitra-lyao.onrender.com/api/createMessaage", SentData)
+  //     const sentmesage = await axios.post("http://localhost:3000/api/createMessaage", SentData)
   //     alert("Message Sent!")
   //     setInput("")
   //     return sentmesage;

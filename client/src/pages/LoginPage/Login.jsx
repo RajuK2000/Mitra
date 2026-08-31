@@ -19,7 +19,7 @@ export const Login = () => {
       };
       console.log(SentData,"SentData");
       
-      const Daata = await axios.post("https://mitra-lyao.onrender.com/api/login", SentData)
+      const Daata = await axios.post("http://localhost:3000/api/login", SentData)
       console.log(Daata.status, "DaataDaata");
       if (Daata.status === 200) {
         sessionStorage.setItem("user", JSON.stringify(Daata))
