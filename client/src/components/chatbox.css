@@ -1,7 +1,6 @@
 /* =========================================================
    Chatbox UI — dark, responsive theme
-   Class names match the existing React component 1:1.
-   No markup/JS changes required.
+   Class names match the React component 1:1.
    ========================================================= */
 
 @import url('https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Inter:wght@400;500;600&display=swap');
@@ -33,6 +32,9 @@
   --radius-md: 12px;
   --radius-sm: 8px;
 
+  /* fluid sidebar width, tightened per-breakpoint below */
+  --sidebar-width: 340px;
+
   font-family: var(--font-body);
   color: var(--text-primary);
   background: var(--bg-app);
@@ -40,7 +42,6 @@
   display: flex;
   width: 100%;
   height: 100vh;
-  /* overflow: hidden; */
   box-sizing: border-box;
 }
 
@@ -50,12 +51,17 @@
   box-sizing: border-box;
 }
 
+.chat-wrapper *:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 /* ---------------------------------------------------------
    Sidebar
    --------------------------------------------------------- */
 
 .sidebar {
-  width: 340px;
+  width: var(--sidebar-width);
   min-width: 280px;
   flex-shrink: 0;
   background: var(--bg-sidebar);
@@ -150,7 +156,8 @@
   font-weight: 600;
   font-size: 16px;
   color: #0f1115;
-  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-warm) 100%);
+  /* default gradient; overridden per-contact via inline style */
+  background-image: linear-gradient(135deg, var(--accent) 0%, var(--accent-warm) 100%);
   text-transform: uppercase;
 }
 
@@ -161,30 +168,43 @@
 }
 
 .contact-info {
-  /* min-width: 0; */
-  /* display: flex; */
-  /* flex-direction: column; */
-  /* gap: 0px; */
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
-.contact-info strong {
+.contact-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.contact-row strong {
   font-family: var(--font-display);
   font-size: 14.5px;
   font-weight: 600;
   color: var(--text-primary);
   white-space: nowrap;
-  /* overflow: hidden; */
+  overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.contact-info span {
+.contact-time {
+  flex-shrink: 0;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.contact-info span:not(.contact-time) {
   font-size: 12.5px;
   color: var(--text-muted);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 220px;
-  display: inline-block;
+  display: block;
 }
 
 /* ---------------------------------------------------------
@@ -209,14 +229,23 @@
   padding: 16px 24px;
   border-bottom: 1px solid var(--border-subtle);
   background: var(--bg-panel);
+  min-height: 68px;
 }
 
 .chat-header1 {
   display: flex;
-  gap: 1vw;
+  align-items: center;
+  gap: 12px;
 }
 
-.back-button {
+.chat-header-placeholder {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.back-btn {
   display: none;
   align-items: center;
   justify-content: center;
@@ -228,14 +257,14 @@
   border-radius: 50%;
   background: transparent;
   color: var(--text-primary);
-  font-size: 18px;
+  font-size: 1.5rem;
   line-height: 1;
   cursor: pointer;
   flex-shrink: 0;
   transition: background 0.15s ease;
 }
 
-.back-button:hover {
+.back-btn:hover {
   background: var(--bg-hover);
 }
 
@@ -254,6 +283,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
+  min-height: 15px;
 }
 
 .chat-header p:not(:empty)::before {
@@ -280,6 +310,55 @@
   }
 }
 
+.logout {
+  cursor: pointer;
+  transition: filter 0.15s ease, transform 0.1s ease;
+}
+
+.logout:hover {
+  filter: brightness(1.1);
+}
+
+.logout:active {
+  transform: scale(0.95);
+}
+
+/* ---------------------------------------------------------
+   Empty state (no conversation selected — desktop/tablet only)
+   --------------------------------------------------------- */
+
+.empty-state {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 24px;
+  color: var(--text-muted);
+}
+
+.empty-state-icon {
+  font-size: 40px;
+  margin-bottom: 14px;
+  opacity: 0.7;
+}
+
+.empty-state h3 {
+  margin: 0 0 6px;
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.empty-state p {
+  margin: 0;
+  font-size: 13.5px;
+  max-width: 280px;
+  line-height: 1.5;
+}
+
 /* ---------------------------------------------------------
    Messages
    --------------------------------------------------------- */
@@ -296,6 +375,19 @@
 .msg {
   display: flex;
   max-width: 100%;
+  animation: msg-in 0.18s ease;
+}
+
+@keyframes msg-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .msg.me {
@@ -371,15 +463,6 @@
 
 .chat-input input::placeholder {
   color: var(--text-muted);
-}
-
-.logout {
-  cursor: pointer;
-}
-
-.back-btn {
-  font-size: 1.5rem;
-  cursor: pointer;
 }
 
 .chat-input input:focus {
@@ -470,21 +553,61 @@
   white-space: nowrap;
 }
 
-/* ---------------------------------------------------------
-   Responsive breakpoints
-   --------------------------------------------------------- */
+/* ===========================================================
+   RESPONSIVE BREAKPOINTS
+   Mobile      : ≤ 680px   — single pane, WhatsApp-style slide
+   Tablet      : 681–1024px — narrow fixed sidebar
+   Laptop      : 1025–1439px — default sizing (base styles above)
+   Desktop/XL  : ≥ 1440px  — centered shell, roomier spacing
+   =========================================================== */
 
-@media (max-width: 900px) {
-  .sidebar {
-    width: 280px;
-    min-width: 240px;
+/* ---------- Tablet ---------- */
+@media (min-width: 681px) and (max-width: 1024px) {
+  .chat-wrapper {
+    --sidebar-width: 300px;
   }
 
   .bubble {
-    max-width: 75%;
+    max-width: 70%;
+  }
+
+  .messages {
+    padding: 20px;
+  }
+
+  .chat-header {
+    padding: 14px 20px;
   }
 }
 
+/* ---------- Large desktop / XL monitors ---------- */
+@media (min-width: 1440px) {
+  .chat-wrapper {
+    --sidebar-width: 380px;
+    max-width: 1600px;
+    margin: 0 auto;
+    border-left: 1px solid var(--border-subtle);
+    border-right: 1px solid var(--border-subtle);
+  }
+
+  .messages {
+    padding: 32px 48px;
+  }
+
+  .bubble {
+    max-width: min(52%, 560px);
+  }
+
+  .chat-input {
+    padding: 18px 32px;
+  }
+
+  .chat-header {
+    padding: 18px 32px;
+  }
+}
+
+/* ---------- Mobile ---------- */
 @media (max-width: 680px) {
   /* WhatsApp-style single pane: sidebar and chat-area each take the
      full screen, sitting side by side in a 2-panel track. Sliding
@@ -494,7 +617,8 @@
   .chat-wrapper {
     position: relative;
     height: 100vh;
-    overflow: scroll;
+    height: 100dvh;
+    overflow: hidden;
   }
 
   .sidebar,
@@ -524,7 +648,7 @@
     transform: translateX(0%);
   }
 
-  .back-button {
+  .back-btn {
     display: flex;
   }
 
@@ -543,6 +667,10 @@
 
   .bubble {
     max-width: 85%;
+  }
+
+  .empty-state {
+    padding: 40px 24px;
   }
 }
 
@@ -577,6 +705,10 @@
 
 @media (prefers-reduced-motion: reduce) {
   .chat-header p:not(:empty)::before {
+    animation: none;
+  }
+
+  .msg {
     animation: none;
   }
 }
