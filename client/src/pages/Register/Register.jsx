@@ -10,7 +10,7 @@ export default function Register() {
         email: "",
         mobile: "",
         age: "",
-        isLogin: fasle
+        isLogin: false
     });
 
     const handleChange = (e) => {
