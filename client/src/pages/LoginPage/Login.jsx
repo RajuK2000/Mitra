@@ -15,15 +15,15 @@ export const Login = () => {
     e.preventDefault();
     try {
       const SentData = {
-        email: data.email.toLowerCase()
+        email: data.email.toLowerCase(),
+        isLogin: true
       };
-      console.log(SentData,"SentData");
-      
+      console.log(SentData, "SentData");
       const Daata = await axios.post("https://mitra-lyao.onrender.com/api/login", SentData)
-      console.log(Daata.status, "DaataDaata");
-      if (Daata.status === 200) {
-        sessionStorage.setItem("user", JSON.stringify(Daata))
-        navigate("/chats")
+      console.log(Daata, "DaataDaata");
+      if (Daata?.status === 200) {
+        sessionStorage.setItem("user", JSON.stringify(Daata?.data?.token))
+        navigate("/chats");
       }
     } catch (error) {
       alert(error?.response?.data?.message)

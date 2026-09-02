@@ -4,6 +4,7 @@ import axios from "axios";
 import useDebounce from "../hooks/Debouncing";
 import socket from "../../socket/socket.js";
 import { useNavigate } from "react-router-dom";
+import { jwtDecode } from "jwt-decode";
 
 // Deterministic color per name so contacts are visually distinguishable
 // instead of every avatar sharing the same gradient.
@@ -44,12 +45,14 @@ export default function Chatbox() {
   const [users, setUsers] = useState([]);
   const debouncedSearch = useDebounce(search, 500);
   const navigate = useNavigate();
+  console.log(active, "activeactive");
 
-  const openConversation = (conversationId, name, receiverId) => {
+  const openConversation = (conversationId, name, receiverId, isLogin) => {
     setActive({
       id: conversationId,
       name,
       reciverId: receiverId,
+      isLogin: isLogin
     });
 
     activeRef.current = conversationId;
@@ -58,14 +61,18 @@ export default function Chatbox() {
   };
 
   useEffect(() => {
-    const logeduser = JSON.parse(sessionStorage.getItem("user") || "{}");
-    SetLogInuser(logeduser?.data);
-    ConversationFetch(logeduser?.data?._id);
+    const logeduser = JSON.parse(sessionStorage.getItem("user") || "");
+    if (logeduser) {
+      const decoded = jwtDecode(logeduser);
+      SetLogInuser(decoded);
+      ConversationFetch(decoded?.userId);
+    }
+
   }, []);
 
   useEffect(() => {
-    if (loginUser?._id) {
-      socket.emit("register", loginUser._id);
+    if (loginUser?.userId) {
+      socket.emit("register", loginUser.userId);
     }
   }, [loginUser]);
 
@@ -110,10 +117,10 @@ export default function Chatbox() {
       const updated = prev.map((conversation) =>
         String(conversation._id) === String(conversationId)
           ? {
-              ...conversation,
-              lastMessage,
-              updatedAt: new Date().toISOString(),
-            }
+            ...conversation,
+            lastMessage,
+            updatedAt: new Date().toISOString(),
+          }
           : conversation
       );
 
@@ -160,6 +167,8 @@ export default function Chatbox() {
   }, []);
 
   const ConversationFetch = async (user_Id) => {
+    console.log(user_Id, "hhhhhhhh");
+
     try {
       const Conversations = await axios.get(
         `https://mitra-lyao.onrender.com/api/conversations/${user_Id}`
@@ -188,7 +197,7 @@ export default function Chatbox() {
     }
 
     socket.emit("sendMessage", {
-      senderId: loginUser._id,
+      senderId: loginUser.userId,
       receiverId,
       message: input,
       messageType: "text",
@@ -203,6 +212,7 @@ export default function Chatbox() {
       id: "",
       name: "",
       reciverId: "",
+      isLogin: null
     });
 
     activeRef.current = null;
@@ -249,11 +259,25 @@ export default function Chatbox() {
     return groups;
   }, {});
 
-  const LogOut = () => {
-    sessionStorage.removeItem("user");
-    setTimeout(() => {
-      navigate("/");
-    }, 100);
+  const LogOut = async () => {
+    try {
+
+      const data = {
+        email: loginUser.email,
+        islogin: false
+      }
+      const Responce = await axios.post("https://mitra-lyao.onrender.com/api/logout", data)
+      if (Responce.status === 200) {
+        sessionStorage.removeItem("user");
+        setTimeout(() => {
+          navigate("/");
+        }, 100);
+      }
+    } catch (err) {
+      console.log(err,"jjjjjj");
+      
+      alert(err?.message)
+    }
   };
 
   const hasActiveChat = Boolean(active?.id);
@@ -276,82 +300,81 @@ export default function Chatbox() {
         <div className="contact-list">
           {search !== ""
             ? users.map((c) => {
-                const mine = c._id === loginUser?._id;
-                if (mine) return null;
+              const mine = c._id === loginUser?.userId;
+              if (mine) return null;
 
-                return (
-                  <div
-                    key={c._id}
-                    className={`contact-item ${
-                      c._id === active.id ? "active" : ""
+              return (
+                <div
+                  key={c._id}
+                  className={`contact-item ${c._id === active.id ? "active" : ""
                     }`}
-                    onClick={() => {
-                      setActive({
-                        id: c._id,
-                        name: c?.name,
-                        reciverId: c?._id,
-                      });
-                      activeRef.current = null;
-                      setMessage([]);
-                    }}
-                  >
-                    <div className="avatar" style={avatarGradient(c?.name)}>
-                      {initial(c?.name)}
-                    </div>
-
-                    <div className="contact-info">
-                      <div className="contact-row">
-                        <strong>{titleCase(c?.name)}</strong>
-                      </div>
-                      <span>{c.lastMessage || "Start a conversation"}</span>
-                    </div>
+                  onClick={() => {
+                    setActive({
+                      id: c._id,
+                      name: c?.name,
+                      reciverId: c?._id,
+                      isLogin: c?.isLogin
+                    });
+                    activeRef.current = null;
+                    setMessage([]);
+                  }}
+                >
+                  <div className="avatar" style={avatarGradient(c?.name)}>
+                    {initial(c?.name)}
                   </div>
-                );
-              })
+
+                  <div className="contact-info">
+                    <div className="contact-row">
+                      <strong>{titleCase(c?.name)}</strong>
+                    </div>
+                    <span>{c.lastMessage || "Start a conversation"}</span>
+                  </div>
+                </div>
+              );
+            })
             : mergedConversations.map((c) => {
-                const otherUser = c.participants.find(
-                  (p) => String(p._id) !== String(loginUser?._id)
-                );
-
-                return (
-                  <div
-                    key={c._id || otherUser?.id}
-                    className={`contact-item ${
-                      c._id === active.id ? "active" : ""
+              const otherUser = c.participants.find(
+                (p) => String(p._id) !== String(loginUser?.userId)
+              );
+              return (
+                <div
+                  key={c._id || otherUser?.id}
+                  className={`contact-item ${c._id === active.id ? "active" : ""
                     }`}
-                    onClick={
-                      c._id
-                        ? () => {
-                            openConversation(
-                              c._id,
-                              otherUser?.name,
-                              otherUser?._id
-                            );
-                          }
-                        : undefined
-                    }
+                  onClick={
+                    c._id
+                      ? () => {
+                        openConversation(
+                          c._id,
+                          otherUser?.name,
+                          otherUser?._id,
+                          otherUser?.isLogin
+                        );
+                      }
+                      : undefined
+                  }
+                >
+                  <div
+                    className="avatar"
+                    style={avatarGradient(otherUser?.name)}
                   >
-                    <div
-                      className="avatar"
-                      style={avatarGradient(otherUser?.name)}
-                    >
-                      {initial(otherUser?.name)}
-                    </div>
-
-                    <div className="contact-info">
-                      <div className="contact-row">
-                        <strong>{titleCase(otherUser?.name)}</strong>
-                        {c.updatedAt && (
-                          <span className="contact-time">
-                            {formatListTime(c.updatedAt)}
-                          </span>
-                        )}
-                      </div>
-                      <span>{c?.lastMessage || "No messages yet"}</span>
-                    </div>
+                    {initial(otherUser?.name)}
                   </div>
-                );
-              })}
+
+                  <div className="contact-info">
+                    <div className="contact-row">
+                      <strong>{titleCase(otherUser?.name)}</strong>
+                      {c.updatedAt && (
+                        <span className="contact-time">
+                          {formatListTime(c.updatedAt)}
+                        </span>
+                      )}
+                    </div>
+                    <span>{c?.lastMessage || "No messages yet"}</span>
+                  </div>
+                </div>
+              );
+            })}
         </div>
       </aside>
 
@@ -372,7 +395,9 @@ export default function Chatbox() {
                 </div>
                 <div>
                   <h3>{titleCase(active?.name)}</h3>
-                  <p>{active?.name && "Online"}</p>
+                  {active?.isLogin ?
+                    <p>Online</p>
+                    : <span>Offline</span>}
                 </div>
               </>
             ) : (
@@ -395,9 +420,8 @@ export default function Chatbox() {
                   {messages.map((m) => (
                     <div
                       key={m._id}
-                      className={`msg ${
-                        m.senderId === loginUser?._id ? "me" : "them"
-                      }`}
+                      className={`msg ${m.senderId === loginUser?.userId ? "me" : "them"
+                        }`}
                     >
                       <div className="bubble">
                         {m.message}

@@ -12,6 +12,7 @@ const port = process.env.PORT || 3000;
 const userRoutes = require("./routes/userRoutes");
 const userLogin = require("./routes/userlogin");
 const messagesRoutes = require("./routes/messagesRoute");
+const UserLogout = require("./routes/userlogout")
 const ConnectDB = require("./config/db");
 
 const allowedOrigins = [
@@ -54,6 +55,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/api", userRoutes);
 app.use("/api", userLogin);
 app.use("/api", messagesRoutes);
+app.use("/api", UserLogout);
 
 app.get("/", (req, res) => {
     res.send("Mitra Server Running");

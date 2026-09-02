@@ -157,7 +157,7 @@
   font-size: 16px;
   color: #0f1115;
   /* default gradient; overridden per-contact via inline style */
-  background-image: linear-gradient(135deg, var(--accent) 0%, var(--accent-warm) 100%);
+  background-color: var(--accent-dim);
   text-transform: uppercase;
 }
 
@@ -249,9 +249,9 @@
   display: none;
   align-items: center;
   justify-content: center;
-  width: 34px;
-  height: 34px;
-  margin-right: 2px;
+  /* width: 34px;
+  height: 34px; */
+  /* margin-right: 2px; */
   padding: 0;
   border: none;
   border-radius: 50%;
@@ -280,6 +280,15 @@
   margin: 2px 0 0;
   font-size: 12.5px;
   color: var(--accent);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 15px;
+}
+.chat-header span {
+  margin: 2px 0 0;
+  font-size: 12.5px;
+  color: var(--accent-dim);
   display: flex;
   align-items: center;
   gap: 6px;
@@ -316,7 +325,7 @@
 }
 
 .logout:hover {
-  filter: brightness(1.1);
+  filter: brightness(1.4);
 }
 
 .logout:active {

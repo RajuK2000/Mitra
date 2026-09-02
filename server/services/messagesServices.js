@@ -109,7 +109,7 @@ const getConversationsServicebyUserId = async (id) => {
       .find({
         participants: id
       })
-      .populate("participants", "_id name email")
+      .populate("participants", "_id name email isLogin")
       .sort({ updatedAt: -1 });
 
     if (conversations.length > 0) {

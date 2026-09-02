@@ -17,6 +17,10 @@ const UserSchema = new mangoose.Schema({
     mobile: {
         type: Number,
         require: true
+    },
+    isLogin: {
+        type: Boolean,
+        require: true
     }
 });
 
