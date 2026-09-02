@@ -26,7 +26,7 @@ const Loginuser = async (req, res) => {
         isLogin: user.isLogin,
         name: user.name
       },
-      process.env.JWT_SECRET,
+      "4578549856",
 
     );
 
